@@ -1,0 +1,106 @@
+[user]
+    name = lugh
+    email = lucamevieira@gmail.com
+
+[init]
+    defaultBranch = main
+
+[core]
+    editor = nvim
+    pager = delta
+    autocrlf = input
+    excludesfile = ~/.config/git/ignore
+
+[pull]
+    rebase = true
+    ff = only
+
+[push]
+    default = current
+    autoSetupRemote = true
+    followTags = true
+
+[fetch]
+    prune = true
+    pruneTags = true
+
+[rebase]
+    autoStash = true
+    autoSquash = true
+
+[merge]
+    conflictStyle = zdiff3
+    tool = nvim
+    ff = false
+
+[mergetool]
+    keepBackup = false
+
+[diff]
+    algorithm = histogram
+    colorMoved = default
+    renames = copies
+    submodule = log
+    tool = nvim
+
+[difftool]
+    prompt = false
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true
+    side-by-side = false
+    line-numbers = true
+    syntax-theme = gruvbox-dark
+    file-style = bold
+    hunk-header-style = bold
+    minus-style = syntax "#3c1414"
+    plus-style = syntax "#1c2a14"
+
+[color]
+    ui = auto
+
+[alias]
+    s = status --short
+    st = status
+    co = checkout
+    br = branch
+    sw = switch
+    cm = commit -m
+    cma = commit --amend --no-edit
+    last = log -1 HEAD
+    lg = log --oneline --decorate --graph -20
+    lga = log --oneline --decorate --graph --all
+    undo = reset HEAD~1 --mixed
+    aliases = config --get-regexp ^alias\\.
+
+[help]
+    autocorrect = prompt
+
+[rerere]
+    enabled = true
+
+[transfer]
+    fsckObjects = true
+[fetch]
+    fsckObjects = true
+[receive]
+    fsckObjects = true
+
+[commit]
+    gpgsign = false       # set to true once a signing key is configured
+    verbose = true
+
+[tag]
+    gpgsign = false
+
+[advice]
+    detachedHead = false
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential

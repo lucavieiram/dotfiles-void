@@ -1,0 +1,91 @@
+#!/bin/bash
+# acer-profile-switcher: CLI pra trocar modo de fan/profile
+set -u
+
+OVERRIDE_FILE="/var/lib/acer-power/override"
+PROFILE_FILE="/sys/firmware/acpi/platform_profile"
+FAN_FILE="/sys/devices/platform/acer-wmi/nitro_sense/fan_speed"
+
+# Ciclo só com modos manuais — auto removido
+CYCLE=(econ balanced performance)
+
+current_override() {
+    local v
+    [ -r "$OVERRIDE_FILE" ] && v=$(cat "$OVERRIDE_FILE" 2>/dev/null) || v=""
+    # Se vazio (estado auto antigo), inicializa em balanced
+    [ -z "$v" ] && v="balanced"
+    echo "$v"
+}
+
+set_mode() {
+    local mode="$1"
+    case "$mode" in
+        econ|balanced|performance) echo -n "$mode" > "$OVERRIDE_FILE" ;;
+        auto)                      echo -n ""      > "$OVERRIDE_FILE" ;;
+        *) echo "modo inválido: $mode" >&2; exit 1 ;;
+    esac
+    sudo -n /usr/local/bin/acer-power-manager 2>/dev/null || \
+        echo "ERRO: sudo NOPASSWD não configurado" >&2
+
+    if command -v notify-send >/dev/null 2>&1; then
+        local label
+        case "$mode" in
+            econ)        label="Econ — fan auto-mínimo" ;;
+            balanced)    label="Balanced — fan 40%" ;;
+            performance) label="Performance — fan 80%" ;;
+            auto)        label="Auto (temp-reativo)" ;;
+        esac
+        notify-send -t 2000 -i input-gaming "Power profile" "$label"
+    fi
+}
+
+cycle_next() {
+    local cur="$(current_override)"
+    local i=0
+    # Se cur não está no ciclo (ex.: estava em "auto"), começa do início
+    local found=0
+    for i in "${!CYCLE[@]}"; do
+        [ "${CYCLE[$i]}" = "$cur" ] && { found=1; break; }
+    done
+    if [ "$found" = "0" ]; then
+        set_mode "${CYCLE[0]}"
+        return
+    fi
+    local next="${CYCLE[$(((i+1) % ${#CYCLE[@]}))]}"
+    set_mode "$next"
+}
+
+json_status() {
+    local mode profile fan class icon label
+    mode="$(current_override)"
+    profile=$(cat "$PROFILE_FILE" 2>/dev/null || echo "?")
+    fan=$(cat "$FAN_FILE" 2>/dev/null || echo "?")
+
+    case "$mode" in
+        econ)        class="econ";        icon="󰂈"; label="Econ" ;;
+        balanced)    class="balanced";    icon="󰶘"; label="Balanced" ;;
+        performance) class="performance"; icon="󰓅"; label="Performance" ;;
+        *)           class="balanced";    icon="󰶘"; label="?" ;;
+    esac
+
+    printf '{"text":"%s","tooltip":"%s — %s · fan %s","class":"%s","alt":"%s"}\n' \
+        "$icon" "$label" "$profile" "$fan" "$class" "$mode"
+}
+
+usage() {
+    cat <<USAGE
+Uso: acer-profile-switcher <comando>
+  --cycle           Próximo modo (econ→balanced→performance→econ)
+  --set <mode>      Aplica modo: econ | balanced | performance | auto
+  --status          Imprime modo atual
+  --json            Saída JSON pra waybar
+USAGE
+}
+
+case "${1:-}" in
+    --cycle)  cycle_next ;;
+    --set)    [ -n "${2:-}" ] && set_mode "$2" || { usage; exit 1; } ;;
+    --status) echo "modo: $(current_override) · profile: $(cat $PROFILE_FILE) · fan: $(cat $FAN_FILE)" ;;
+    --json)   json_status ;;
+    *)        usage; exit 1 ;;
+esac

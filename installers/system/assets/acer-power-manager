@@ -1,0 +1,64 @@
+#!/bin/bash
+set -u
+
+PROFILE_FILE="/sys/firmware/acpi/platform_profile"
+FAN_FILE="/sys/devices/platform/acer-wmi/nitro_sense/fan_speed"
+AC_FILE="/sys/class/power_supply/ACAD/online"
+BAT_FILE="/sys/class/power_supply/BAT1/capacity"
+OVERRIDE_FILE="/var/lib/acer-power/override"
+
+AC=$(cat "$AC_FILE" 2>/dev/null || echo 0)
+BAT=$(cat "$BAT_FILE" 2>/dev/null || echo 100)
+OV=""
+[ -r "$OVERRIDE_FILE" ] && OV=$(cat "$OVERRIDE_FILE" 2>/dev/null || true)
+
+# Lê temps (silencioso se nvidia-smi não responder rápido)
+gpu_temp() {
+    nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null | head -1 || echo 0
+}
+cpu_temp() {
+    # Package id 0 do coretemp (sempre o mais quente entre cores)
+    local f
+    for d in /sys/class/hwmon/hwmon*; do
+        [ "$(cat "$d/name" 2>/dev/null)" = "coretemp" ] || continue
+        for f in "$d"/temp*_label; do
+            [ -r "$f" ] && grep -q "Package id 0" "$f" 2>/dev/null && {
+                echo $(( $(cat "${f%_label}_input") / 1000 ))
+                return
+            }
+        done
+    done
+    echo 0
+}
+
+apply() {
+    echo "$1" > "$PROFILE_FILE" 2>/dev/null || true
+    echo "$2" > "$FAN_FILE" 2>/dev/null || true
+    logger -t acer-power "mode=$3 profile=$1 fan=$2 AC=$AC BAT=$BAT% gpu=${4:-?}°C cpu=${5:-?}°C override=${OV:-none}"
+}
+
+case "$OV" in
+    econ)        apply "low-power"             "0,0"   "econ" ;;
+    balanced)    apply "balanced"              "50,50" "balanced" ;;
+    performance) apply "balanced-performance"  "80,80" "performance" ;;
+    ""|auto)
+        # Bateria baixa: força econ independente de temp
+        if [ "$AC" != "1" ] && [ "$BAT" -lt 45 ]; then
+            apply "low-power" "0,0" "auto-low-bat"
+        else
+            # Lê temps e escolhe fan curve
+            G=$(gpu_temp)
+            C=$(cpu_temp)
+            MAX=$(( G > C ? G : C ))
+            if   [ "$MAX" -ge 80 ]; then apply "balanced-performance" "80,80" "auto-hot"     "$G" "$C"
+            elif [ "$MAX" -ge 70 ]; then apply "balanced-performance" "60,60" "auto-warm"    "$G" "$C"
+            elif [ "$MAX" -ge 60 ]; then apply "balanced"              "50,50" "auto-mild"   "$G" "$C"
+            else                         apply "balanced"              "20,20" "auto-cool"   "$G" "$C"
+            fi
+        fi
+        ;;
+    *)
+        logger -t acer-power "WARN: override desconhecido '$OV'"
+        apply "balanced" "20,20" "auto-fallback"
+        ;;
+esac

@@ -1,0 +1,12 @@
+{
+    // Drawer com seta — só mostra os ícones do tray ao passar o mouse
+    "custom/tray-arrow": {
+        "format": "󰅁",
+        "tooltip": false
+    },
+
+    "tray": {
+        "icon-size": 16,
+        "spacing": 8
+    }
+}

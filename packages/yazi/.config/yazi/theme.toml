@@ -1,0 +1,36 @@
+# yazi theme — Gruvbox-tinted
+# Used regardless of dark/light mode — yazi runs in the terminal which
+# already follows the theme.
+
+[manager]
+cwd     = { fg = "#fabd2f" }
+hovered = { fg = "#1d2021", bg = "#fabd2f" }
+preview_hovered = { underline = true }
+
+[status]
+separator_open  = ""
+separator_close = ""
+separator_style = { fg = "#3c3836", bg = "#282828" }
+
+mode_normal = { bg = "#fabd2f", fg = "#1d2021", bold = true }
+mode_select = { bg = "#b8bb26", fg = "#1d2021", bold = true }
+mode_unset  = { bg = "#fb4934", fg = "#1d2021", bold = true }
+
+progress_label    = { fg = "#fabd2f", bold = true }
+progress_normal   = { fg = "#fabd2f", bg = "#3c3836" }
+progress_error    = { fg = "#fb4934", bg = "#3c3836" }
+
+permissions_t = { fg = "#83a598" }
+permissions_r = { fg = "#b8bb26" }
+permissions_w = { fg = "#fb4934" }
+permissions_x = { fg = "#fabd2f" }
+permissions_s = { fg = "#d3869b" }
+
+[filetype]
+rules = [
+    { mime = "image/*",         fg = "#d3869b" },
+    { mime = "video/*",         fg = "#fe8019" },
+    { mime = "audio/*",         fg = "#fabd2f" },
+    { mime = "application/zip", fg = "#fb4934" },
+    { name = "*/",              fg = "#83a598", bold = true },
+]

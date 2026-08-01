@@ -1,0 +1,27 @@
+{
+    "network": {
+        "format-wifi":         "{icon}",
+        "format-ethernet":     "󰈀",
+        "format-linked":       "󱘖",
+        "format-disconnected": "󰤮",
+        "format-disabled":     "󰤮",
+        "format-icons":        ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+        "tooltip-format":      "{essid} · {signalStrength}% · {ifname}",
+        "tooltip-format-ethernet": "{ifname} · {ipaddr}",
+        "tooltip-format-disconnected": "Disconnected",
+        "on-click":       "nm-connection-editor",
+        "on-click-right": "pkill nm-connection-editor"
+    },
+
+    "bluetooth": {
+        "format":           "󰂯",
+        "format-connected": "󰂱",
+        "format-disabled":  "󰂲",
+        "format-off":       "󰂲",
+        "tooltip-format":            "{controller_alias}\t{controller_address}",
+        "tooltip-format-connected":  "{device_alias}",
+        "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+        "on-click":       "blueman-manager",
+        "on-click-right": "rfkill toggle bluetooth"
+    }
+}

@@ -1,0 +1,12 @@
+# ~/.config/sway/config
+# Top-level: modifier vars + include the modular config.d/*.conf files.
+
+set $mod      Mod4
+set $alt      Mod1
+set $term     footclient
+set $menu     fuzzel
+set $files    footclient -e yazi
+set $browser  firefox
+set $editor   nvim
+
+include $HOME/.config/sway/config.d/*.conf

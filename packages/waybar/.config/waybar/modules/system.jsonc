@@ -1,0 +1,22 @@
+{
+    "cpu": {
+        "tooltip": false,
+        "interval": 5,
+        "format": "󰻠",
+        "format-alt": "󰻠 <span size='11pt'>{usage}%</span>",
+        "states": { "warning": 75, "critical": 90 }
+    },
+
+    "temperature": {
+        "tooltip": false,
+        "interval": 5,
+        // Path estável via platform device (coretemp.0). temp1_input = Package id 0
+        "hwmon-path-abs": "/sys/devices/platform/coretemp.0/hwmon",
+        "input-filename": "temp1_input",
+        "critical-threshold": 85,
+        "format": "{icon}",
+        "format-alt": "{icon} <span size='11pt'>{temperatureC}°C</span>",
+        "format-critical": "<span size='12pt'>󱗗 </span><span size='11pt'>{temperatureC}°C</span>",
+        "format-icons": ["󱃃", "󰔏", "󱃂"]
+    }
+}

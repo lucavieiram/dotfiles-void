@@ -1,0 +1,39 @@
+/* wlogout — gruvbox dark with Void-green hover.
+ * Keeps the original PNG icons via background-image. */
+
+* {
+    background-image: none;
+    box-shadow: none;
+    font-family: "Ubuntu Nerd Font", "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 16px;
+}
+
+window {
+    background-color: rgba(40, 40, 40, 0.92);   /* #282828 @ 92% */
+}
+
+button {
+    color: #ebdbb2;                              /* gruvbox fg */
+    background-color: #3c3836;                   /* gruvbox dark1 */
+    border: 2px solid #504945;                   /* gruvbox dark2 */
+    border-radius: 16px;
+    margin: 24px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 25%;
+    transition: all 0.2s ease;
+}
+
+button:focus,
+button:active,
+button:hover {
+    background-color: #478061;                   /* Void green */
+    color: #ebdbb2;
+    border-color: #a9b665;
+    outline: none;
+}
+
+#lock     { background-image: image(url("icons/lock.png")); }
+#logout   { background-image: image(url("icons/logout.png")); }
+#reboot   { background-image: image(url("icons/reboot.png")); }
+#shutdown { background-image: image(url("icons/shutdown.png")); }

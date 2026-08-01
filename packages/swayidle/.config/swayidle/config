@@ -1,0 +1,17 @@
+# ~/.config/swayidle/config
+# swayidle is invoked from sway autostart with explicit timeouts;
+# this file is for documentation / manual invocation.
+#
+# Default policy (codified in 50-autostart.conf):
+#   5 min idle  → lock-now.sh
+#   10 min idle → screen off
+#   before-sleep → lock
+#   on lock signal → lock-now.sh
+#
+# To run standalone for testing:
+#   swayidle -d -w timeout 30 'notify-send idle 30s'
+
+timeout 300  '~/.local/bin/lock-now.sh'
+timeout 600  'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"'
+before-sleep '~/.local/bin/lock-now.sh'
+lock         '~/.local/bin/lock-now.sh'

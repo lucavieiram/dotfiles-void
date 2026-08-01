@@ -1,0 +1,14 @@
+{
+    // Custom module — usa acer-profile-switcher (linuwu-sense backend).
+    // Ícones: econ=󰂈  balanced=󰶘  performance=
+    "custom/power-profile": {
+        "exec": "acer-profile-switcher --json",
+        "return-type": "json",
+        "interval": 2,
+        "on-click":       "acer-profile-switcher --cycle",
+        "on-click-right": "acer-profile-switcher --set balanced",
+        "on-scroll-up":   "acer-profile-switcher --cycle",
+        "on-scroll-down": "acer-profile-switcher --cycle",
+        "tooltip": true
+    }
+}

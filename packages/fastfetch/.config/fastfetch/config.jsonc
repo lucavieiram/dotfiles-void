@@ -1,0 +1,43 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+
+    "logo": {
+        "source": "/home/lugh/.config/fastfetch/void-logo.txt",
+        "type": "file",
+        "padding": { "top": 1, "right": 3, "left": 1 },
+        "color": { "1": "green", "2": "white" }
+    },
+
+    "display": {
+        "separator": "  ",
+        "key": { "width": 9 },
+        "size": { "binaryPrefix": "si" },
+        "color": {
+            "keys": "green",
+            "title": "green",
+            "separator": "8"
+        }
+    },
+
+    "modules": [
+        {
+            "type": "title",
+            "format": "{user-name-colored}{at-symbol-colored}{host-name-colored}"
+        },
+        { "type": "separator", "string": "─", "length": 30, "outputColor": "8" },
+        { "type": "os",        "key": " os" },
+        { "type": "kernel",    "key": " kernel" },
+        { "type": "uptime",    "key": "󰅐 uptime" },
+        { "type": "packages",  "key": "󰏖 pkgs" },
+        { "type": "shell",     "key": " shell" },
+        { "type": "wm",        "key": " wm" },
+        { "type": "terminal",  "key": " term" },
+        { "type": "separator", "string": "─", "length": 30, "outputColor": "8" },
+        { "type": "cpu",       "key": " cpu" },
+        { "type": "gpu",       "key": "󰢮 gpu", "hideType": "vulkan" },
+        { "type": "memory",    "key": " mem" },
+        { "type": "disk",      "key": " disk", "folders": "/" },
+        { "type": "separator", "string": "─", "length": 30, "outputColor": "8" },
+        { "type": "colors",    "symbol": "circle" }
+    ]
+}

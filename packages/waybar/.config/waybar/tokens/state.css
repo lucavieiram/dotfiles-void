@@ -1,0 +1,26 @@
+@import "colors.css";
+
+#battery.charging,
+#custom-tray-arrow.inhibited-none {
+    color: @accent_green;
+}
+
+#idle_inhibitor.activated,
+#cpu.warning,
+#disk.warning,
+#custom-disk.warning,
+#memory.warning,
+#battery.warning:not(.charging) {
+    color: @accent_yellow;
+}
+
+#network.disabled,
+#cpu.critical,
+#disk.critical,
+#custom-disk.critical,
+#memory.critical,
+#temperature.critical,
+#battery.critical:not(.charging),
+#custom-power-profile.performance {
+    color: @accent_red;
+}

@@ -1,0 +1,37 @@
+# Managed by dotfiles-void (installers/system/phases/04-session.sh).
+# PAM (pam_env.so) sources this at login so every program inherits these.
+
+XDG_CURRENT_DESKTOP=sway
+XDG_SESSION_TYPE=wayland
+XDG_SESSION_DESKTOP=sway
+
+# Wayland-native rendering
+GDK_BACKEND=wayland
+QT_QPA_PLATFORM="wayland;xcb"
+QT_AUTO_SCREEN_SCALE_FACTOR=1
+QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+MOZ_ENABLE_WAYLAND=1
+NIXOS_OZONE_WL=1
+_JAVA_AWT_WM_NONREPARENTING=1
+
+# NVIDIA workarounds (harmless on non-NVIDIA hardware)
+WLR_NO_HARDWARE_CURSORS=1
+__GLX_VENDOR_LIBRARY_NAME=nvidia
+# Allow G-Sync/VRR. The external HDMI monitor (Acer KG241, on the dGPU) exposes
+# FreeSync over HDMI in the 48-75 Hz range; this lets adaptive_sync engage.
+__GL_GSYNC_ALLOWED=1
+# PRIME render offload — all OpenGL/Vulkan apps render on NVIDIA dGPU.
+# Justified on this hardware: HDMI-A-2 is wired to dGPU, so NVIDIA is awake
+# whenever the external monitor is plugged. Rendering on NVIDIA eliminates
+# the cross-PCIe Intel→NVIDIA bridge that would otherwise happen per frame.
+__NV_PRIME_RENDER_OFFLOAD=1
+# Video decode stays on Intel iGPU (intel-media-driver). nvidia-vaapi-driver
+# would be needed to switch to NVIDIA decode.
+LIBVA_DRIVER_NAME=iHD
+GBM_BACKEND=nvidia-drm
+
+# Default apps
+EDITOR=nvim
+VISUAL=nvim
+BROWSER=firefox
+TERMINAL=foot

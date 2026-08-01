@@ -1,0 +1,47 @@
+// ~/.config/waybar/config.jsonc — modular athena port, Sway-native, gruvbox
+{
+    "layer": "top",
+    "position": "top",
+    "height": 42,
+    "spacing": 6,
+
+    "margin-top": 8,
+    "margin-right": 8,
+    "margin-bottom": 0,
+    "margin-left": 8,
+
+    "include": [
+        "./modules/groups.jsonc",
+        "./modules/distro.jsonc",
+        "./modules/storage.jsonc",
+        "./modules/system.jsonc",
+        "./modules/power-profile.jsonc",
+        "./modules/workspace.jsonc",
+        "./modules/idle-inhibitor.jsonc",
+        "./modules/audio.jsonc",
+        "./modules/connections.jsonc",
+        "./modules/battery.jsonc",
+        "./modules/clock.jsonc",
+        "./modules/tray-notif.jsonc"
+    ],
+
+    "modules-left": [
+        "group/distro-group",
+        "group/storage",
+        "group/system"
+    ],
+
+    "modules-center": [
+        "custom/power-profile",
+        "sway/workspaces",
+        "idle_inhibitor"
+    ],
+
+    "modules-right": [
+        "group/audio",
+        "group/connections",
+        "battery",
+        "clock",
+        "group/tray-group"
+    ]
+}

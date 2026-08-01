@@ -1,0 +1,42 @@
+# Global gitignore — applies to every repo.
+# Use repo-local .gitignore for project-specific patterns.
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# Build / dependency dirs
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+target/
+dist/
+build/
+.next/
+.cache/
+
+# Logs / runtime
+*.log
+.env
+.env.local
+.env.*.local
+
+# Secrets — never commit
+*.pem
+*.key
+*.crt
+id_rsa
+id_ed25519
+*_private*
+
+**/.claude/settings.local.json

@@ -1,0 +1,12 @@
+{
+    // Focus mode — toggle no swayidle (impede screensaver/lock enquanto ativo)
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated":   "󰛨",
+            "deactivated": "󰛩"
+        },
+        "tooltip-format-activated":   "Focus mode ON",
+        "tooltip-format-deactivated": "Focus mode OFF"
+    }
+}

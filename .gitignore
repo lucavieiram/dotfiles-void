@@ -1,0 +1,37 @@
+# Editor/OS junk
+*.swp
+*.bak
+*~
+.DS_Store
+
+# Logs
+*.log
+**/state/*.log
+
+# Theme symlink (created at runtime by bootstrap or theme-switch.sh)
+themes/current
+
+# Per-machine LazyVim lock — keep one canonical, ignore others
+# Comment the next line if you want to pin plugin versions across machines
+packages/nvim/.config/nvim/lazy-lock.json
+
+# Local-only Wofi/foot caches if any leak
+**/cache/
+
+# Secrets — should never end up here, but belt-and-suspenders
+packages/ssh/.ssh/id_*
+packages/ssh/.ssh/known_hosts
+**/*.key
+**/*.pem
+**/.env
+**/.env.local
+
+# Per-session working artifacts from Claude Code skills (plan, state, etc.)
+# These document the development process but aren't part of the distributed repo.
+tasks/
+
+# Bundled exports for external AI review (not part of the repo)
+_gemini-bundle/
+
+# Private game-history / roleplay notes — Nextcloud-backed but never pushed to GitHub
+game-history/

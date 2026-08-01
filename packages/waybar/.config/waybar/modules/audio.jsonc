@@ -1,0 +1,31 @@
+{
+    "pulseaudio": {
+        "format": "{icon}",
+        "format-muted": "󰖁",
+        "format-icons": {
+            "headphone":  "󰋋",
+            "headset":    "󰋋",
+            "hands-free": "󰋋",
+            "default":    ["󰕿", "󰖀", "󰕾"]
+        },
+        "scroll-step": 5,
+        "on-click":       "pamixer -t",
+        "on-click-right": "pavucontrol",
+        "tooltip-format": "Output: {volume}%"
+    },
+
+    "pulseaudio#microphone": {
+        "format":              "{format_source}",
+        "format-source":       "󰍬",
+        "format-source-muted": "󰍭",
+        "on-click":            "pamixer --default-source -t",
+        "on-click-right":      "pavucontrol -t 4",
+        "tooltip": false
+    },
+
+    "pulseaudio/slider": {
+        "min": 0,
+        "max": 100,
+        "orientation": "horizontal"
+    }
+}

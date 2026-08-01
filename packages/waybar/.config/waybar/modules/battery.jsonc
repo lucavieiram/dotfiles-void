@@ -1,0 +1,12 @@
+{
+    "battery": {
+        "interval": 30,
+        "states": { "warning": 30, "critical": 15 },
+        "format":          "{icon} <span size='11pt'>{capacity}%</span>",
+        "format-charging": "󰂄 <span size='11pt'>{capacity}%</span>",
+        "format-plugged":  "󰚥 <span size='11pt'>{capacity}%</span>",
+        "format-alt":      "{icon} <span size='11pt'>{time}</span>",
+        "format-icons":    ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+        "tooltip-format":  "{timeTo} · {power}W · health {health}% · cycles {cycles}"
+    }
+}

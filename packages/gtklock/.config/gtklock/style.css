@@ -1,0 +1,101 @@
+/* gtklock — gruvbox-dark theme.
+ * Background set at runtime by lock-now.sh via -b flag (blurred wallpaper).
+ */
+
+window {
+    background-color: #282828;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Center the entire form vertically + horizontally with a subtle tint. */
+.window-box {
+    background-color: rgba(40, 40, 40, 0.30);
+    padding: 80px 100px;
+    border-radius: 24px;
+}
+
+/* Huge clock. */
+.clock-label {
+    color: #ebdbb2;
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 200px;
+    font-weight: bold;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
+    margin-bottom: 0;
+    padding: 0;
+}
+
+/* Date — discreet under clock. */
+.date-label {
+    color: #d5c4a1;
+    font-family: "Inter", sans-serif;
+    font-size: 22px;
+    font-weight: 400;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+    margin-top: 0;
+    margin-bottom: 100px;
+    padding: 0;
+}
+
+/* Hide the "Password:" label — entry alone is clearly a password field. */
+.input-label {
+    font-size: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Hide submit button — Enter on the entry submits already. */
+button,
+.unlock-button {
+    font-size: 0;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    opacity: 0;
+}
+
+/* Password entry — small pill, centered. */
+entry {
+    min-width: 220px;
+    min-height: 28px;
+    padding: 4px 14px;
+    border-radius: 16px;
+    border: 2px solid #504945;
+    background-color: rgba(29, 32, 33, 0.85);
+    color: #ebdbb2;
+    font-family: "JetBrainsMono Nerd Font";
+    font-size: 13px;
+    caret-color: #fabd2f;
+}
+
+entry:focus {
+    border-color: #fabd2f;
+    background-color: rgba(29, 32, 33, 0.95);
+}
+
+/* Status / error / warning labels under input. */
+.error-label,
+label.error {
+    color: #fb4934;
+    font-size: 13px;
+    margin-top: 16px;
+}
+
+.warning-label,
+label.warning {
+    color: #fabd2f;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+.message-label {
+    color: #a89984;
+    font-size: 12px;
+    margin-top: 8px;
+}
