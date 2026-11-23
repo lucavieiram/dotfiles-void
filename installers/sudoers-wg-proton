@@ -1,0 +1,4 @@
+# /etc/sudoers.d/wg-proton — lets the Quickshell control center toggle ProtonVPN without a password.
+# Only these exact commands; any other wg-quick use still asks for the password.
+# Install:  sudo install -m 440 installers/sudoers-wg-proton /etc/sudoers.d/wg-proton && sudo visudo -c
+lugh ALL=(root) NOPASSWD: /usr/bin/wg-quick up proton, /usr/bin/wg-quick down proton

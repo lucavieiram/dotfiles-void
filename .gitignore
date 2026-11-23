@@ -35,3 +35,6 @@ _gemini-bundle/
 
 # Private game-history / roleplay notes — Nextcloud-backed but never pushed to GitHub
 game-history/
+
+# quickshell-cutover.sh backups (needed by --undo)
+*.pre-quickshell

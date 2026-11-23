@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# theme-walls-hyde — download a HyDE theme's wallpapers into ~/Pictures/Wallpapers/<our-theme>/
+#
+#   theme-walls-hyde Gruvbox-Retro gruvbox-dark
+#   theme-walls-hyde Tokyo-Night   tokyo-night      (any folder name; it shows under "All")
+#   theme-walls-hyde --list                         HyDE themes available
+#
+# Source: github.com/HyDE-Project/hyde-themes (one branch per theme, images under */wallpapers/).
+# The repo states no licence: keep these images local, never commit them to a public repo.
+set -euo pipefail
+API=https://api.github.com/repos/HyDE-Project/hyde-themes
+RAW=https://raw.githubusercontent.com/HyDE-Project/hyde-themes
+
+if [ "${1:-}" = "--list" ]; then
+    curl -fsSL "$API/branches?per_page=100" | python3 -c \
+        'import json,sys; print("\n".join(b["name"] for b in json.load(sys.stdin) if b["name"][0].isupper()))'
+    exit 0
+fi
+[ $# -eq 2 ] || { sed -n '3,6p' "$0"; exit 64; }
+branch=$1; dest="$HOME/Pictures/Wallpapers/$2"
+mkdir -p "$dest"
+
+curl -fsSL "$API/git/trees/$branch?recursive=1" | python3 -c '
+import json, sys, urllib.parse
+for t in json.load(sys.stdin).get("tree", []):
+    p = t["path"]
+    if t["type"] == "blob" and "/wallpapers/" in p and p.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+        print(urllib.parse.quote(p))
+' | while read -r path; do
+    name=$(basename "$(python3 -c 'import sys,urllib.parse; print(urllib.parse.unquote(sys.argv[1]))' "$path")")
+    [ -f "$dest/$name" ] && continue
+    curl -fsSL "$RAW/$branch/$path" -o "$dest/$name.part" && mv "$dest/$name.part" "$dest/$name" && echo "  $name"
+done
+echo "done: $(find "$dest" -maxdepth 1 -type f ! -name '*.part' | wc -l) images in $dest"

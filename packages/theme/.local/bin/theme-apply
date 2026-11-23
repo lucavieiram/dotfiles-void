@@ -1,0 +1,243 @@
+#!/usr/bin/env python3
+"""theme-apply -- recolour the whole desktop from one palette.
+
+Usage:
+  theme-apply <name>              apply ~/.config/theme/palettes/<name>.json
+  theme-apply --wallpaper <file>  palette from the image (matugen) + set wallpaper
+  theme-apply --set-wallpaper <f> only change the wallpaper, keep the theme
+  theme-apply --previous          go back to the theme applied before the current one
+  theme-apply --list              print theme names
+  theme-apply --walls             JSON {theme: chosen wallpaper, else first in its folder, else null}
+
+Each template in ~/.config/theme/templates/<out>.tmpl is rendered to ~/.cache/theme/<out>.
+Apps include those fragments; their own configs stay hand-written.
+Env (tests): THEME_HOME, THEME_CACHE, THEME_DRY=1 (no reloads), THEME_NO_PTY=1,
+THEME_BTOP_CONF (path of btop.conf to edit).
+"""
+import json
+import os
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+from string import Template
+
+HOME = Path(os.environ.get("THEME_HOME", Path.home() / ".config/theme"))
+CACHE = Path(os.environ.get("THEME_CACHE", Path.home() / ".cache/theme"))
+BTOP_CONF = Path(os.environ.get("THEME_BTOP_CONF", Path.home() / ".config/btop/btop.conf"))
+WALL_DIR = Path(os.environ.get("THEME_WALL_DIR", Path.home() / "Pictures/Wallpapers"))
+IMAGE_EXT = {".png", ".jpg", ".jpeg", ".webp"}
+REQUIRED = ["name", "mode", "bg0", "bg1", "bg2", "bg3", "fg", "fg_dim", "accent", "red",
+            "orange", "yellow", "green", "aqua", "blue", "purple", "nvim_colorscheme",
+            "btop_theme"]
+
+
+def die(msg):
+    print(f"theme-apply: {msg}", file=sys.stderr)
+    sys.exit(1)
+
+
+def load_named(name):
+    path = HOME / "palettes" / f"{name}.json"
+    if not path.is_file():
+        die(f"unknown theme '{name}' (see --list)")
+    return json.loads(path.read_text())
+
+
+def from_wallpaper(image):
+    """Palette from matugen; semantic accents borrowed from gruvbox-dark."""
+    if not Path(image).is_file():
+        die(f"wallpaper not found: {image}")
+    r = subprocess.run(["matugen", "image", "--dry-run", "--prefer", "saturation",
+                        "--json", "hex", "-m", "dark", str(image)],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        die(f"matugen failed on {image}: {r.stderr.strip()[-300:]}")
+    c = {k: v["default"]["color"] for k, v in json.loads(r.stdout)["colors"].items()}
+    p = load_named("gruvbox-dark")
+    p.pop("ansi", None)
+    p.update(name="wallpaper", mode="dark", source=str(image),
+             bg0=c["surface_container_lowest"], bg1=c["surface"],
+             bg2=c["surface_container"], bg3=c["surface_container_highest"],
+             fg=c["on_surface"], fg_dim=c["on_surface_variant"], accent=c["primary"],
+             btop_theme="")
+    return p
+
+
+def variables(p):
+    missing = [k for k in REQUIRED if k not in p]
+    if missing:
+        die(f"palette '{p.get('name', '?')}' is missing key(s): {', '.join(missing)}")
+    ansi = p.get("ansi") or [p[k] for k in ("bg2", "red", "green", "yellow", "blue",
+                                            "purple", "aqua", "fg_dim")] * 2
+    if p.get("ansi") is None:
+        ansi[8], ansi[15] = p["bg3"], p["fg"]  # bright black / bright white
+    v = {k: str(val) for k, val in p.items() if isinstance(val, str)}
+    # terminal background: the darker of bg0/bg1, so terminals sit darker than the panels
+    lum = lambda h: sum(w * int(h.lstrip("#")[i:i + 2], 16) for w, i in ((0.299, 0), (0.587, 2), (0.114, 4)))
+    v["term_bg"] = min(p["bg0"], p["bg1"], key=lum)
+    v.update({f"ansi{i}": c for i, c in enumerate(ansi)})
+    v.update({f"x_{k}": val.lstrip("#") for k, val in list(v.items()) if val.startswith("#")})
+    return v
+
+
+def render(v):
+    out = {}
+    for tmpl in sorted((HOME / "templates").glob("*.tmpl")):
+        try:
+            out[tmpl.stem] = Template(tmpl.read_text()).substitute(v)
+        except KeyError as e:
+            die(f"template {tmpl.name} uses unknown variable {e}")
+    return out
+
+
+def write(files):
+    CACHE.mkdir(parents=True, exist_ok=True)
+    for name, text in files.items():
+        tmp = CACHE / f".{name}.tmp"
+        tmp.write_text(text)
+        os.replace(tmp, CACHE / name)
+
+
+def run(*cmd):
+    if shutil.which(cmd[0]):
+        subprocess.run(cmd, capture_output=True)
+
+
+def osc_to_terminals(v):
+    """Recolour already-open terminals (pywal's trick): OSC 4/10/11 to each pty we own."""
+    seq = "".join(f"\033]4;{i};{v[f'ansi{i}']}\033\\" for i in range(16))
+    seq += f"\033]10;{v['fg']}\033\\\033]11;{v['term_bg']}\033\\"
+    for pts in Path("/dev/pts").glob("[0-9]*"):
+        try:
+            if pts.stat().st_uid == os.getuid():
+                with open(pts, "w") as f:
+                    f.write(seq)
+        except OSError:
+            pass
+
+
+def set_wallpaper(image):
+    WALL_DIR.mkdir(parents=True, exist_ok=True)
+    cur = WALL_DIR / "current.png"
+    cur.unlink(missing_ok=True)
+    cur.symlink_to(Path(image).resolve())
+    if shutil.which("swaybg"):
+        run("pkill", "-x", "swaybg")
+        subprocess.Popen(["swaybg", "-i", str(cur), "-m", "fill"],
+                         start_new_session=True, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL)
+
+
+def set_btop(p):
+    """btop has no include: edit only its color_theme line."""
+    theme = p["btop_theme"] or str(CACHE / "btop.theme")
+    conf = BTOP_CONF.resolve()
+    if conf.is_file():
+        text = conf.read_text()
+        new = re.sub(r'^color_theme\s*=.*$', f'color_theme = "{theme}"', text, flags=re.M)
+        if new != text:
+            conf.write_text(new)
+
+
+def reload_all(p, v, wallpaper):
+    if os.environ.get("THEME_DRY") == "1":
+        return
+    if wallpaper:
+        set_wallpaper(wallpaper)
+    set_btop(p)
+    run("swaymsg", "reload")
+    dark = p["mode"] == "dark"
+    run("gsettings", "set", "org.gnome.desktop.interface", "color-scheme",
+        "prefer-dark" if dark else "prefer-light")
+    run("gsettings", "set", "org.gnome.desktop.interface", "gtk-theme",
+        "adw-gtk3-dark" if dark else "adw-gtk3")
+    if os.environ.get("THEME_NO_PTY") != "1":
+        osc_to_terminals(v)
+
+
+def walls_memory():
+    f = CACHE / "walls.json"
+    return json.loads(f.read_text()) if f.is_file() else {}
+
+
+def remember_wallpaper(image):
+    """If the image lives in a theme's folder (Wallpapers/<theme>/), remember it for that theme."""
+    theme = image.parent.name
+    if image.parent.parent.resolve() == WALL_DIR.resolve() and (HOME / "palettes" / f"{theme}.json").is_file():
+        mem = walls_memory()
+        mem[theme] = str(image)
+        CACHE.mkdir(parents=True, exist_ok=True)
+        (CACHE / "walls.json").write_text(json.dumps(mem, indent=2))
+
+
+def theme_wallpaper(name, preview=False):
+    """Wallpaper the user chose for this theme (in the Walls tab), else None.
+    preview=True falls back to the first image in Wallpapers/<name>/, only for thumbnails:
+    applying a theme never picks a photo on the user's behalf."""
+    chosen = walls_memory().get(name)
+    if chosen and Path(chosen).is_file():
+        return chosen
+    if not preview:
+        return None
+    folder = WALL_DIR / name
+    if folder.is_dir():
+        imgs = sorted(f for f in folder.iterdir() if f.suffix.lower() in IMAGE_EXT and f.is_file())
+        if imgs:
+            return str(imgs[0])
+    return None
+
+
+def apply(spec):
+    """spec is a theme name or 'wallpaper:<file>'."""
+    from_image = spec.startswith("wallpaper:")
+    wallpaper = spec.split(":", 1)[1] if from_image else None
+    p = from_wallpaper(wallpaper) if from_image else load_named(spec)
+    if not from_image:
+        wallpaper = theme_wallpaper(spec)   # None = leave the current wallpaper alone
+    v = variables(p)
+    files = render(v)
+    prev = None
+    cur = CACHE / "current.json"
+    if cur.is_file():
+        prev = json.loads(cur.read_text()).get("spec")
+    files["current.json"] = json.dumps(dict(p, spec=spec, wallpaper=wallpaper), indent=2)
+    if prev and prev != spec:
+        files["previous"] = prev
+    write(files)
+    reload_all(p, v, wallpaper)
+    print(f"theme-apply: {p['name']}")
+
+
+def main(argv):
+    if not argv or argv[0] in ("-h", "--help"):
+        print(__doc__)
+        return
+    if argv[0] == "--list":
+        print("\n".join(sorted(f.stem for f in (HOME / "palettes").glob("*.json"))))
+    elif argv[0] == "--walls":
+        names = sorted(f.stem for f in (HOME / "palettes").glob("*.json"))
+        print(json.dumps({n: theme_wallpaper(n, preview=True) for n in names}))
+    elif argv[0] == "--previous":
+        prev = CACHE / "previous"
+        if not prev.is_file():
+            die("no previous theme recorded")
+        apply(prev.read_text().strip())
+    elif argv[0] == "--set-wallpaper":
+        if len(argv) < 2 or not Path(argv[1]).expanduser().is_file():
+            die("--set-wallpaper needs an existing file")
+        image = Path(argv[1]).expanduser().absolute()
+        remember_wallpaper(image)
+        if os.environ.get("THEME_DRY") != "1":
+            set_wallpaper(image)
+    elif argv[0] == "--wallpaper":
+        if len(argv) < 2:
+            die("--wallpaper needs a file")
+        apply(f"wallpaper:{Path(argv[1]).expanduser().resolve()}")
+    else:
+        apply(argv[0])
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
