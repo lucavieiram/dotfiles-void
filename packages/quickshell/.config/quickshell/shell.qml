@@ -9,6 +9,7 @@ import qs.panels
 import qs.notifications
 import qs.power
 import qs.osd
+import qs.lock
 import qs.services
 
 ShellRoot {
@@ -37,6 +38,7 @@ ShellRoot {
     AudioPanel {}
     WifiPanel {}
     Osd {}
+    Lock {}
 
     // Sway binds call these: qs ipc call panels toggleLeft
     IpcHandler {
