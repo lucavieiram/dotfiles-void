@@ -5,10 +5,10 @@
     "keybind" : "l"
 }
 {
-    "label" : "logout",
-    "action" : "loginctl terminate-user $USER",
-    "text" : "󰍃  Logout",
-    "keybind" : "e"
+    "label" : "suspend",
+    "action" : "loginctl suspend",
+    "text" : "󰤄  Suspend",
+    "keybind" : "u"
 }
 {
     "label" : "reboot",

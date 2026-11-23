@@ -1,0 +1,19 @@
+# yazi keymap — extra shortcuts on top of the defaults (press ~ or F1 for the full list)
+
+[mgr]
+prepend_keymap = [
+    # Arrow keys behave like a normal file manager: → enters a folder or opens a file
+    { on = "<Right>",     run = "enter",                  desc = "Enter folder" },
+    { on = "l",           run = "enter",                  desc = "Enter folder" },
+    { on = "<Enter>",     run = "open",                   desc = "Open with default app" },
+    { on = "<Backspace>", run = "leave",                  desc = "Go to parent folder" },
+    { on = ".",           run = "hidden toggle",          desc = "Show/hide hidden files" },
+
+    # Quick jumps: g + letter
+    { on = ["g", "o"], run = "cd ~/Documents",            desc = "Go to Documents" },
+    { on = ["g", "f"], run = "cd ~/Documents/Faculdade",  desc = "Go to Faculdade" },
+    { on = ["g", "p"], run = "cd ~/Pictures",             desc = "Go to Pictures" },
+    { on = ["g", "k"], run = "cd ~/Code",                 desc = "Go to Code" },
+    { on = ["g", "s"], run = "cd /storage",               desc = "Go to /storage" },
+    { on = ["g", "l"], run = "follow",                    desc = "Follow hovered symlink" },
+]

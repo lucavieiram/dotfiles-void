@@ -34,6 +34,6 @@ button:hover {
 }
 
 #lock     { background-image: image(url("icons/lock.png")); }
-#logout   { background-image: image(url("icons/logout.png")); }
+#suspend  { background-image: image(url("/usr/share/wlogout/icons/suspend.png")); }
 #reboot   { background-image: image(url("icons/reboot.png")); }
 #shutdown { background-image: image(url("icons/shutdown.png")); }
